@@ -8,11 +8,17 @@ const dbConfig = {
   database: "desafiodb",
 };
 
-const selectNames = async (req, res) => {
+const init = async (req, res) => {
+  const {name} = req.params
   const connection = mysql.createConnection(dbConfig);
-  const sql = `SELECT name FROM people;`;
+  
+  const sqlInsert = `INSERT INTO people(name) VALUES('${name || "Default name"}');`;
+  connection.query(sqlInsert)
 
-  connection.query(sql, (error, results, fields) => {
+
+  const sqlSelect = `SELECT name FROM people;`;
+
+  connection.query(sqlSelect, (error, results, fields) => {
     if (error) throw error;
 
     let listLi = results.map((item) => `<li>${item.name}<\li>`);
@@ -27,23 +33,12 @@ const selectNames = async (req, res) => {
   connection.end();
 };
 
-const insertName = async (name) => {
-  const connection = mysql.createConnection(dbConfig);
-  const sql = `insert into people(name) values('${name}');`;
-
-  connection.query(sql);
-  connection.end();
-};
-
-app.get("/", async (req, res, next) => {
-  await insertName('Elton Casacio');
-  await selectNames(req, res);
+app.get("/", (req, res, next) => {
+  init(req, res);
 });
 
-app.get("/:name", async (req, res) => {
-  const { name } = req.params;
-  await insertName(name);
-  await selectNames(req, res);
+app.get("/:name", (req, res) => {
+  init(req, res);
 });
 
 app.listen(port, () => console.log(`Servidor ouvindo na porta ${port}`));
