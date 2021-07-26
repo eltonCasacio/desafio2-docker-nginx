@@ -27,7 +27,22 @@ const selectNames = async (req, res) => {
   connection.end();
 };
 
-app.get("/", async (req, res) => {
+const insertName = async (name) => {
+  const connection = mysql.createConnection(dbConfig);
+  const sql = `insert into people(name) values('${name}');`;
+
+  connection.query(sql);
+  connection.end();
+};
+
+app.get("/", async (req, res, next) => {
+  await insertName('Elton Casacio');
+  await selectNames(req, res);
+});
+
+app.get("/:name", async (req, res) => {
+  const { name } = req.params;
+  await insertName(name);
   await selectNames(req, res);
 });
 
